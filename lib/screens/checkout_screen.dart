@@ -1,24 +1,29 @@
-import 'package:flutpp/models/cart_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/cart_service.dart';
-import 'checkout_screen.dart';
+import 'delivery_screen.dart';
+import 'dine_in_screen.dart';
 
-class CartScreen extends StatelessWidget {
+class CheckoutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartService = Provider.of<CartService>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shopping Cart'),
+        title: Text('Checkout'),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
               itemCount: cartService.items.length,
-              itemBuilder: (ctx, i) => CartItemWidget(cartService.items[i]),
+              itemBuilder: (ctx, i) => ListTile(
+                title: Text(cartService.items[i].name),
+                subtitle: Text('Quantity: ${cartService.items[i].quantity}'),
+                trailing: Text(
+                    '\$${(cartService.items[i].price * cartService.items[i].quantity).toStringAsFixed(2)}'),
+              ),
             ),
           ),
           Container(
@@ -53,60 +58,41 @@ class CartScreen extends StatelessWidget {
                 ElevatedButton(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      'Proceed to Checkout',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    child: Text('Delivery', style: TextStyle(fontSize: 18)),
                   ),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: cartService.items.isEmpty
-                      ? null
-                      : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => CheckoutScreen()),
-                          );
-                        },
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => DeliveryScreen()),
+                    );
+                  },
+                ),
+                SizedBox(height: 12),
+                OutlinedButton(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text('Dine In', style: TextStyle(fontSize: 18)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => DineInScreen()),
+                    );
+                  },
                 ),
                 SizedBox(height: 25),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CartItemWidget extends StatelessWidget {
-  final CartItem cartItem;
-
-  CartItemWidget(this.cartItem);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: ListTile(
-          leading: CircleAvatar(
-            child: Padding(
-              padding: EdgeInsets.all(5),
-              child: FittedBox(
-                child: Text('\$${cartItem.price}'),
-              ),
-            ),
-          ),
-          title: Text(cartItem.name),
-          subtitle: Text(
-              'Total: \$${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
-          trailing: Text('${cartItem.quantity}x'),
-        ),
       ),
     );
   }
