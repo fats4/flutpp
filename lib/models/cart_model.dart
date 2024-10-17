@@ -1,13 +1,11 @@
 class CartItem {
   final String id;
-  final String menuId;
   final String name;
   final double price;
   int quantity;
 
   CartItem({
     required this.id,
-    required this.menuId,
     required this.name,
     required this.price,
     this.quantity = 1,
@@ -15,17 +13,16 @@ class CartItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'menuId': menuId,
+      'id': id,
       'name': name,
       'price': price,
       'quantity': quantity,
     };
   }
 
-  factory CartItem.fromMap(String id, Map<String, dynamic> map) {
+  factory CartItem.fromMap(Map<String, dynamic> map) {
     return CartItem(
-      id: id,
-      menuId: map['menuId'],
+      id: map['id'],
       name: map['name'],
       price: map['price'],
       quantity: map['quantity'],

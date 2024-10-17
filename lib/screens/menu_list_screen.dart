@@ -1,13 +1,57 @@
+import 'package:flutpp/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/menu_service.dart';
+import '../services/cart_service.dart';
 import '../models/menu_model.dart';
 
 class MenuListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final cartService = Provider.of<CartService>(context);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Menu List')),
+      appBar: AppBar(
+        title: Text('Menu List'),
+        actions: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.shopping_cart),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => CartScreen()),
+                  );
+                },
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    '${cartService.itemCount}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: StreamBuilder<List<MenuModel>>(
         stream: Provider.of<MenuService>(context, listen: false).getMenus(),
         builder: (context, snapshot) {
@@ -26,6 +70,15 @@ class MenuListScreen extends StatelessWidget {
                     width: 50, height: 50, fit: BoxFit.cover),
                 title: Text(menu.name),
                 subtitle: Text('\$${menu.price.toStringAsFixed(2)}'),
+                trailing: IconButton(
+                  icon: Icon(Icons.add_shopping_cart),
+                  onPressed: () {
+                    cartService.addItem(menu.id, menu.name, menu.price);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${menu.name} added to cart')),
+                    );
+                  },
+                ),
               );
             },
           );
