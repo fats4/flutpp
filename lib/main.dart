@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'services/menu_service.dart';
@@ -11,7 +12,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Inisialisasi kursi jika belum ada
   final seatService = SeatService();
   if (!(await seatService.areSeatsInitialized())) {
     await seatService.initializeSeats();
@@ -35,8 +35,36 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: LoginScreen(),
+        home: AuthWrapper(),
       ),
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final cartService = Provider.of<CartService>(context, listen: false);
+
+    await authService.tryAutoLogin();
+    await cartService.loadCartFromPrefs();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
+    return authService.user == null ? LoginScreen() : HomeScreen();
   }
 }
