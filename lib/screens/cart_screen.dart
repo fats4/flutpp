@@ -82,6 +82,7 @@ class CartScreen extends StatelessWidget {
   }
 }
 
+// ... Rest of the CartItemWidget code remains the same
 class CartItemWidget extends StatelessWidget {
   final CartItem cartItem;
 

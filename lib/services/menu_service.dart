@@ -23,4 +23,24 @@ class MenuService with ChangeNotifier {
       }).toList();
     });
   }
+
+  Future<void> updateMenu(String id, MenuModel menu) async {
+    try {
+      await _menuCollection.doc(id).update(menu.toMap());
+      notifyListeners();
+    } catch (e) {
+      print("Error in MenuService.updateMenu: $e");
+      throw e;
+    }
+  }
+
+  Future<void> deleteMenu(String id) async {
+    try {
+      await _menuCollection.doc(id).delete();
+      notifyListeners();
+    } catch (e) {
+      print("Error in MenuService.deleteMenu: $e");
+      throw e;
+    }
+  }
 }

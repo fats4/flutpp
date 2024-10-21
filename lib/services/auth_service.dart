@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 class AuthService with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserModel? _userModel;
 
   UserModel? get user => _userModel;
@@ -12,12 +14,25 @@ class AuthService with ChangeNotifier {
   AuthService() {
     _auth.authStateChanges().listen((User? user) {
       if (user != null) {
-        _userModel = UserModel(id: user.uid, email: user.email!);
+        _getUserData(user.uid);
       } else {
         _userModel = null;
+        notifyListeners();
       }
-      notifyListeners();
     });
+  }
+
+  Future<void> _getUserData(String uid) async {
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        _userModel = UserModel.fromMap(doc.data() as Map<String, dynamic>);
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Error getting user data: $e");
+    }
   }
 
   Future<bool> signIn(String email, String password) async {
@@ -26,9 +41,8 @@ class AuthService with ChangeNotifier {
           email: email, password: password);
       User? user = result.user;
       if (user != null) {
-        _userModel = UserModel(id: user.uid, email: user.email!);
+        await _getUserData(user.uid);
         await _saveUserToPrefs();
-        notifyListeners();
         return true;
       }
       return false;
@@ -44,9 +58,14 @@ class AuthService with ChangeNotifier {
           email: email, password: password);
       User? user = result.user;
       if (user != null) {
-        _userModel = UserModel(id: user.uid, email: user.email!);
+        // Create a new user document in Firestore
+        await _firestore.collection('users').doc(user.uid).set({
+          'id': user.uid,
+          'email': user.email,
+          'role': 'user', // Default role is user
+        });
+        await _getUserData(user.uid);
         await _saveUserToPrefs();
-        notifyListeners();
         return true;
       }
       return false;
@@ -67,12 +86,15 @@ class AuthService with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', _userModel!.id);
     await prefs.setString('userEmail', _userModel!.email);
+    await prefs.setString(
+        'userRole', _userModel!.role == UserRole.admin ? 'admin' : 'user');
   }
 
   Future<void> _removeUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('userId');
     await prefs.remove('userEmail');
+    await prefs.remove('userRole');
   }
 
   Future<void> tryAutoLogin() async {
@@ -81,8 +103,13 @@ class AuthService with ChangeNotifier {
 
     final userId = prefs.getString('userId');
     final userEmail = prefs.getString('userEmail');
+    final userRole = prefs.getString('userRole');
 
-    _userModel = UserModel(id: userId!, email: userEmail!);
+    _userModel = UserModel(
+      id: userId!,
+      email: userEmail!,
+      role: userRole == 'admin' ? UserRole.admin : UserRole.user,
+    );
     notifyListeners();
   }
 }

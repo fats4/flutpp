@@ -4,11 +4,12 @@ class MenuModel {
   final double price;
   final String imageUrl;
 
-  MenuModel(
-      {required this.id,
-      required this.name,
-      required this.price,
-      required this.imageUrl});
+  MenuModel({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+  });
 
   factory MenuModel.fromMap(Map<String, dynamic> data, String id) {
     return MenuModel(

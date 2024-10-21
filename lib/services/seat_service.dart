@@ -17,9 +17,7 @@ class SeatService {
     await _seatsCollection.doc(seatId).update({'isAvailable': isAvailable});
   }
 
-  // Fungsi baru untuk menginisialisasi kursi
   Future<void> initializeSeats() async {
-    // Hapus semua kursi yang ada
     WriteBatch batch = FirebaseFirestore.instance.batch();
     var snapshots = await _seatsCollection.get();
     for (var doc in snapshots.docs) {
@@ -27,7 +25,6 @@ class SeatService {
     }
     await batch.commit();
 
-    // Buat kursi baru
     batch = FirebaseFirestore.instance.batch();
     for (int i = 1; i <= 25; i++) {
       String seatId = 'A${i.toString().padLeft(2, '0')}';
@@ -40,9 +37,19 @@ class SeatService {
     print('Seats initialized successfully');
   }
 
-  // Fungsi untuk memeriksa apakah kursi sudah diinisialisasi
   Future<bool> areSeatsInitialized() async {
     var snapshot = await _seatsCollection.limit(1).get();
     return snapshot.docs.isNotEmpty;
+  }
+
+  Future<void> addSeat(String seatId) async {
+    await _seatsCollection.doc(seatId).set({
+      'id': seatId,
+      'isAvailable': true,
+    });
+  }
+
+  Future<void> removeSeat(String seatId) async {
+    await _seatsCollection.doc(seatId).delete();
   }
 }

@@ -4,9 +4,62 @@ import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _login(BuildContext context) async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      bool success = await authService.signIn(
+        emailController.text,
+        passwordController.text,
+      );
+
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login failed. Please try again.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,25 +82,10 @@ class LoginScreen extends StatelessWidget {
             ),
             SizedBox(height: 24.0),
             ElevatedButton(
-              child: Text('Login'),
-              onPressed: () async {
-                final authService =
-                    Provider.of<AuthService>(context, listen: false);
-                bool success = await authService.signIn(
-                  emailController.text,
-                  passwordController.text,
-                );
-                if (success) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Login failed')),
-                  );
-                }
-              },
+              child: _isLoading
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text('Login'),
+              onPressed: _isLoading ? null : () => _login(context),
             ),
             TextButton(
               child: Text('Don\'t have an account? Register'),

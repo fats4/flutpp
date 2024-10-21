@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
+import 'firebase_options.dart';
 import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
 import 'services/menu_service.dart';
 import 'services/cart_service.dart';
 import 'services/seat_service.dart';
+import 'services/order_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   final seatService = SeatService();
   if (!(await seatService.areSeatsInitialized())) {
@@ -29,9 +33,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MenuService()),
         ChangeNotifierProvider(create: (_) => CartService()),
         Provider<SeatService>(create: (_) => SeatService()),
+        Provider<OrderService>(create: (_) => OrderService()),
       ],
       child: MaterialApp(
-        title: 'Flutter Firebase Auth',
+        title: 'Restaurant App',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
