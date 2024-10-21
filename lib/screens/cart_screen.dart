@@ -1,7 +1,7 @@
-import 'package:flutpp/models/cart_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/cart_service.dart';
+import '../models/cart_model.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -72,10 +72,10 @@ class CartScreen extends StatelessWidget {
                           );
                         },
                 ),
-                SizedBox(height: 25),
               ],
             ),
           ),
+          SizedBox(height: 25),
         ],
       ),
     );
@@ -89,6 +89,8 @@ class CartItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cartService = Provider.of<CartService>(context, listen: false);
+
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       child: Padding(
@@ -105,8 +107,73 @@ class CartItemWidget extends StatelessWidget {
           title: Text(cartItem.name),
           subtitle: Text(
               'Total: \$${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
-          trailing: Text('${cartItem.quantity}x'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  cartService.updateItemQuantity(
+                      cartItem.id, cartItem.quantity - 1);
+                },
+              ),
+              Text('${cartItem.quantity}'),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  cartService.updateItemQuantity(
+                      cartItem.id, cartItem.quantity + 1);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  _showEditDialog(context, cartItem);
+                },
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, CartItem item) {
+    final quantityController =
+        TextEditingController(text: item.quantity.toString());
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit ${item.name}'),
+        content: TextField(
+          controller: quantityController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(labelText: 'Quantity'),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Save'),
+            onPressed: () {
+              final newQuantity = int.tryParse(quantityController.text);
+              if (newQuantity != null && newQuantity > 0) {
+                Provider.of<CartService>(context, listen: false)
+                    .updateItemQuantity(item.id, newQuantity);
+                Navigator.of(ctx).pop();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Please enter a valid quantity')),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

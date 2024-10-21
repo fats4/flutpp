@@ -37,20 +37,11 @@ class CartService with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> incrementQuantity(String id) async {
+  Future<void> updateItemQuantity(String id, int newQuantity) async {
     final index = _items.indexWhere((item) => item.id == id);
     if (index >= 0) {
-      _items[index].quantity += 1;
-      await _saveCartToPrefs();
-      notifyListeners();
-    }
-  }
-
-  Future<void> decrementQuantity(String id) async {
-    final index = _items.indexWhere((item) => item.id == id);
-    if (index >= 0) {
-      if (_items[index].quantity > 1) {
-        _items[index].quantity -= 1;
+      if (newQuantity > 0) {
+        _items[index].quantity = newQuantity;
       } else {
         _items.removeAt(index);
       }
