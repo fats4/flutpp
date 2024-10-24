@@ -4,6 +4,7 @@ import '../services/menu_service.dart';
 import '../services/cart_service.dart';
 import '../models/menu_model.dart';
 import 'cart_screen.dart';
+import 'menu_detail_screen.dart'; // Import the new screen
 
 class MenuListScreen extends StatelessWidget {
   @override
@@ -29,6 +30,14 @@ class MenuListScreen extends StatelessWidget {
                     width: 50, height: 50, fit: BoxFit.cover),
                 title: Text(menu.name),
                 subtitle: Text('\$${menu.price.toStringAsFixed(2)}'),
+                onTap: () {
+                  // Navigate to detail screen on tap
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MenuDetailScreen(menu: menu),
+                    ),
+                  );
+                },
                 trailing: IconButton(
                   icon: Icon(Icons.add_shopping_cart),
                   onPressed: () {
