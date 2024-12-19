@@ -18,10 +18,20 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(user.role == UserRole.admin ? 'Admin Panel' : 'Menu'),
+        title: Text(
+          'SAKU FOOD',
+          style: TextStyle(
+            color: Color(0xFFFF5722),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline, color: Colors.black87),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => ProfileScreen()),

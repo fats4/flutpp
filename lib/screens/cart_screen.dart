@@ -10,24 +10,78 @@ class CartScreen extends StatelessWidget {
     final cartService = Provider.of<CartService>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Shopping Cart'),
+        title: Text(
+          'Shopping Cart',
+          style: TextStyle(
+            color: Color(0xFFFF5722),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xFFFF5722)),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: cartService.items.length,
-              itemBuilder: (ctx, i) => CartItemWidget(cartService.items[i]),
-            ),
+            child: cartService.items.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 100,
+                          color: Color(0xFFFF5722).withOpacity(0.5),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Your cart is empty',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(16),
+                    itemCount: cartService.items.length,
+                    itemBuilder: (ctx, i) =>
+                        CartItemWidget(cartService.items[i]),
+                  ),
           ),
           Container(
             padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Card(
-                  elevation: 4,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: BorderSide(
+                      color: Color(0xFFFF5722).withOpacity(0.2),
+                    ),
+                  ),
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Row(
@@ -36,41 +90,51 @@ class CartScreen extends StatelessWidget {
                         Text(
                           'Total',
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
                         Text(
                           '\$${cartService.totalAmount.toStringAsFixed(2)}',
                           style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).primaryColor),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFF5722),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
                 SizedBox(height: 16),
-                ElevatedButton(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFFF5722),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: cartService.items.isEmpty
+                        ? null
+                        : () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) => CheckoutScreen()),
+                            );
+                          },
                     child: Text(
                       'Proceed to Checkout',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: cartService.items.isEmpty
-                      ? null
-                      : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => CheckoutScreen()),
-                          );
-                        },
                 ),
               ],
             ),
@@ -93,47 +157,103 @@ class CartItemWidget extends StatelessWidget {
     final cartService = Provider.of<CartService>(context, listen: false);
 
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+      elevation: 0,
+      margin: EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(
+          color: Color(0xFFFF5722).withOpacity(0.2),
+        ),
+      ),
       child: Padding(
-        padding: EdgeInsets.all(8),
-        child: ListTile(
-          leading: CircleAvatar(
-            child: Padding(
-              padding: EdgeInsets.all(5),
-              child: FittedBox(
-                child: Text('\$${cartItem.price}'),
+        padding: EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Color(0xFFFBE9E7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  '\$${cartItem.price}',
+                  style: TextStyle(
+                    color: Color(0xFFFF5722),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
-          ),
-          title: Text(cartItem.name),
-          subtitle: Text(
-              'Total: \$${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.remove),
-                onPressed: () {
-                  cartService.updateItemQuantity(
-                      cartItem.id, cartItem.quantity - 1);
-                },
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cartItem.name,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Total: \$${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFFFF5722),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              Text('${cartItem.quantity}'),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {
-                  cartService.updateItemQuantity(
-                      cartItem.id, cartItem.quantity + 1);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  _showEditDialog(context, cartItem);
-                },
-              ),
-            ],
-          ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove_circle_outline,
+                      color: Color(0xFFFF5722)),
+                  onPressed: () {
+                    cartService.updateItemQuantity(
+                        cartItem.id, cartItem.quantity - 1);
+                  },
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFBE9E7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${cartItem.quantity}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFF5722),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon:
+                      Icon(Icons.add_circle_outline, color: Color(0xFFFF5722)),
+                  onPressed: () {
+                    cartService.updateItemQuantity(
+                        cartItem.id, cartItem.quantity + 1);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.edit_outlined, color: Color(0xFFFF5722)),
+                  onPressed: () {
+                    _showEditDialog(context, cartItem);
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -64,39 +64,141 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+      backgroundColor: Colors.white,
+      body: Container(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 60),
+                  Icon(
+                    Icons.restaurant_menu,
+                    size: 100,
+                    color: Color(0xFFFF5722), // Warna orange untuk icon
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Welcome Back!',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFF5722), // Warna orange untuk text
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon:
+                                  Icon(Icons.email, color: Color(0xFFFF5722)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none, // Hapus border
+                              ),
+                              filled: true,
+                              fillColor: Colors
+                                  .grey[100], // Background field abu-abu muda
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          TextField(
+                            controller: passwordController,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              prefixIcon:
+                                  Icon(Icons.lock, color: Color(0xFFFF5722)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            obscureText: true,
+                          ),
+                          SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFFFF5722),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed:
+                                  _isLoading ? null : () => _login(context),
+                              child: _isLoading
+                                  ? CircularProgressIndicator(
+                                      color: Colors.white)
+                                  : Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors
+                                            .white, // Warna text login biru
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  TextButton(
+                    child: Text(
+                      'Don\'t have an account? Register',
+                      style: TextStyle(
+                        color: Color(
+                            0xFFFF5722), // Warna orange untuk text register
+                        fontSize: 16,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RegisterScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 24.0),
-            ElevatedButton(
-              child: _isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Login'),
-              onPressed: _isLoading ? null : () => _login(context),
-            ),
-            TextButton(
-              child: Text('Don\'t have an account? Register'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterScreen()),
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

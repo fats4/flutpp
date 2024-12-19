@@ -14,8 +14,12 @@ class AdminScreen extends StatelessWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           bottom: TabBar(
+            labelColor: Color(0xFFFF5722),
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: Color(0xFFFF5722),
             tabs: [
               Tab(icon: Icon(Icons.receipt), text: 'Orders'),
               Tab(icon: Icon(Icons.event_seat), text: 'Seats'),
@@ -23,7 +27,8 @@ class AdminScreen extends StatelessWidget {
             ],
           ),
           elevation: 0,
-          toolbarHeight: 0, // Remove the gap by setting toolbarHeight to 0
+          toolbarHeight: 0,
+          backgroundColor: Colors.white,
         ),
         body: TabBarView(
           children: [
@@ -46,55 +51,111 @@ class OrdersTab extends StatelessWidget {
       stream: orderService.getOrders(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFFFF5722),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long,
-                    size: 80, color: const Color.fromARGB(255, 0, 0, 0)),
-                SizedBox(height: 20),
-                Text('No orders yet',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: const Color.fromARGB(255, 0, 0, 0))),
+                Icon(
+                  Icons.receipt_long,
+                  size: 80,
+                  color: Color(0xFFFF5722).withOpacity(0.5),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'No orders yet',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                  ),
+                ),
               ],
             ),
           );
         }
         final orders = snapshot.data!;
         return ListView.builder(
+          padding: EdgeInsets.all(16),
           itemCount: orders.length,
           itemBuilder: (ctx, i) => Dismissible(
             key: Key(orders[i]['id']),
             background: Container(
-              color: Colors.red,
+              color: Colors.red.shade100,
               alignment: Alignment.centerRight,
               padding: EdgeInsets.only(right: 20),
-              child: Icon(Icons.delete, color: Colors.white),
+              child: Icon(Icons.delete, color: Colors.red),
             ),
             direction: DismissDirection.endToStart,
             confirmDismiss: (direction) => _showDeleteConfirmDialog(context),
             onDismissed: (direction) {
               orderService.deleteOrder(orders[i]['id']);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Order deleted')),
+                SnackBar(
+                  content: Text('Order deleted'),
+                  backgroundColor: Color(0xFFFF5722),
+                ),
               );
             },
             child: Card(
-              margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: ListTile(
-                leading: CircleAvatar(
-                  child: Text('${i + 1}'),
-                  backgroundColor: Theme.of(context).primaryColor,
+              elevation: 0,
+              margin: EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Color(0xFFFF5722).withOpacity(0.2),
                 ),
-                title: Text('Order #${orders[i]['id']}',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle:
-                    Text('Total: \$${orders[i]['total'].toStringAsFixed(2)}'),
-                trailing: Icon(Icons.arrow_forward_ios),
+              ),
+              child: ListTile(
+                contentPadding: EdgeInsets.all(16),
+                leading: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFBE9E7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${i + 1}',
+                      style: TextStyle(
+                        color: Color(0xFFFF5722),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  'Order #${orders[i]['id']}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 4),
+                    Text(
+                      'Total: \$${orders[i]['total'].toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: Color(0xFFFF5722),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Color(0xFFFF5722),
+                  size: 20,
+                ),
                 onTap: () => _showOrderDetails(context, orders[i]),
               ),
             ),
@@ -108,16 +169,30 @@ class OrdersTab extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Order'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Text(
+          'Delete Order',
+          style: TextStyle(color: Color(0xFFFF5722)),
+        ),
         content: Text('Are you sure you want to delete this order?'),
         actions: [
           TextButton(
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
             onPressed: () => Navigator.of(ctx).pop(false),
           ),
           ElevatedButton(
             child: Text('Delete'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
           ),
         ],
@@ -290,63 +365,125 @@ class MenuTab extends StatelessWidget {
     final menuService = Provider.of<MenuService>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: StreamBuilder<List<MenuModel>>(
         stream: menuService.getMenus(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFFFF5722),
+              ),
+            );
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.restaurant_menu, size: 80, color: Colors.grey),
-                  SizedBox(height: 20),
-                  Text('No menu items available',
-                      style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Icon(
+                    Icons.restaurant_menu,
+                    size: 80,
+                    color: Color(0xFFFF5722).withOpacity(0.5),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'No menu items yet',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ),
             );
           }
+
           final menuItems = snapshot.data!;
           return ListView.builder(
+            padding: EdgeInsets.all(16),
             itemCount: menuItems.length,
             itemBuilder: (ctx, i) => Card(
-              margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    menuItems[i].imageUrl,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.fastfood, size: 50),
-                  ),
+              elevation: 0,
+              margin: EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Color(0xFFFF5722).withOpacity(0.2),
                 ),
-                title: Text(menuItems[i].name,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('\$${menuItems[i].price.toStringAsFixed(2)}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddMenuScreen(menuItem: menuItems[i]),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        menuItems[i].imageUrl,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFBE9E7),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      },
+                          child: Icon(
+                            Icons.fastfood,
+                            size: 40,
+                            color: Color(0xFFFF5722),
+                          ),
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _showDeleteMenuConfirmDialog(
-                          context, menuItems[i], menuService),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            menuItems[i].name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '\$${menuItems[i].price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFFFF5722),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit_outlined),
+                          color: Color(0xFFFF5722),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddMenuScreen(menuItem: menuItems[i]),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete_outline),
+                          color: Colors.red[300],
+                          onPressed: () => _showDeleteMenuConfirmDialog(
+                              context, menuItems[i], menuService),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -356,6 +493,8 @@ class MenuTab extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFFFF5722),
+        elevation: 2,
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(
@@ -371,22 +510,38 @@ class MenuTab extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Menu Item'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Text(
+          'Delete Menu Item',
+          style: TextStyle(color: Color(0xFFFF5722)),
+        ),
         content: Text('Are you sure you want to delete ${menuItem.name}?'),
         actions: [
           TextButton(
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: Text('Delete'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
               menuService.deleteMenu(menuItem.id);
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text('${menuItem.name} deleted successfully')),
+                  content: Text('${menuItem.name} deleted successfully'),
+                  backgroundColor: Color(0xFFFF5722),
+                ),
               );
             },
           ),
